@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+<title>📜 AD&D 2e Campaign Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;800&family=Alegreya:wght@400;500;700&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;background:#0c0a0e;color:#D4CCC0;font-family:'Alegreya','Palatino',Georgia,serif;font-size:15px;-webkit-tap-highlight-color:transparent;}
+input,textarea,button,select{font-family:inherit;}
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:#2a2735;border-radius:3px;}
+input:focus,textarea:focus{border-color:rgba(196,155,60,0.3)!important;outline:none;}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;}
+input[type=number]{-moz-appearance:textfield;appearance:textfield;}
+@keyframes fadeIn{from{opacity:0;transform:translateX(-50%) translateY(-10px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
+@keyframes pinPulse{0%,100%{box-shadow:0 0 4px rgba(196,155,60,0.3);}50%{box-shadow:0 0 12px rgba(196,155,60,0.6);}}
+
+.cin{font-family:'Cinzel',Georgia,serif;}
+.lbl{display:block;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:#6B6560;margin-bottom:3px;font-family:'Cinzel',Georgia,serif;}
+.inp{width:100%;padding:7px 10px;background:rgba(196,155,60,0.04);border:1px solid rgba(196,155,60,0.12);border-radius:5px;color:#D4CCC0;font-size:14px;font-family:inherit;outline:none;}
+.inp-sm{padding:4px 6px;width:52px;font-size:14px;text-align:center;font-weight:700;}
+.ta{resize:vertical;font-size:13px;}
+.card{background:#14121a;border:1px solid #2a2735;border-radius:8px;padding:14px;margin-bottom:8px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.flex{display:flex;align-items:center;}
+.gap4{gap:4px;}.gap6{gap:6px;}.gap8{gap:8px;}
+.mb4{margin-bottom:4px;}.mb6{margin-bottom:6px;}.mb8{margin-bottom:8px;}.mb10{margin-bottom:10px;}
+.w100{width:100%;}
+
+.tab-bar{display:flex;border-bottom:1px solid #2a2735;padding:0 4px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.tab-bar::-webkit-scrollbar{display:none;}
+.tab-btn{flex:none;padding:10px 14px;background:transparent;border:none;border-bottom:2px solid transparent;color:#555;cursor:pointer;font-family:'Cinzel',Georgia,serif;font-size:11px;font-weight:700;white-space:nowrap;}
+.section-btn{width:100%;display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(196,155,60,0.03);border:1px solid rgba(196,155,60,0.08);border-radius:5px;cursor:pointer;font-family:'Cinzel',Georgia,serif;font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;}
+.section-body{padding:10px 12px;margin-left:6px;margin-top:4px;}
+.add-btn{width:100%;margin-top:12px;padding:12px;background:rgba(196,155,60,0.08);border:2px dashed rgba(196,155,60,0.2);border-radius:8px;color:#C49B3C;cursor:pointer;font-family:'Cinzel',Georgia,serif;font-size:14px;font-weight:700;}
+.remove-btn{background:rgba(155,35,53,0.1);border:1px solid rgba(155,35,53,0.2);border-radius:5px;color:#9B2335;cursor:pointer;padding:3px 8px;font-size:11px;}
+.slot-btn{width:20px;height:20px;border-radius:4px;border:1px solid rgba(196,155,60,0.15);background:rgba(196,155,60,0.04);color:#6B6560;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;padding:0;}
+.slot-dot{width:18px;height:18px;border-radius:50%;cursor:pointer;transition:all 0.15s;border:2px solid #555;background:transparent;}
+.slot-dot.filled{background:#C49B3C;border-color:#C49B3C;}
+
+.hp-bar-track{width:100%;height:5px;background:rgba(196,155,60,0.06);border-radius:3px;overflow:hidden;margin-bottom:6px;}
+.hp-bar-fill{height:100%;border-radius:3px;transition:width 0.3s;}
+.hp-minus{flex:1;padding:5px 0;background:rgba(155,35,53,0.12);border:1px solid rgba(155,35,53,0.25);border-radius:5px;color:#9B2335;cursor:pointer;font-weight:700;font-size:12px;}
+.hp-plus{flex:1;padding:5px 0;background:rgba(91,117,83,0.12);border:1px solid rgba(91,117,83,0.25);border-radius:5px;color:#5B7553;cursor:pointer;font-weight:700;font-size:12px;}
+.hp-rest{flex:1;padding:5px 0;background:rgba(196,155,60,0.06);border:1px solid rgba(196,155,60,0.12);border-radius:5px;color:#6B6560;cursor:pointer;font-weight:600;font-size:12px;}
+
+.map-pin{position:absolute;transform:translate(-50%,-100%);cursor:pointer;z-index:5;transition:filter 0.15s;}
+.map-pin:hover{filter:brightness(1.3);}
+.map-pin-icon{width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:16px solid #9B2335;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5));}
+.map-pin-label{position:absolute;top:-22px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:9px;font-family:'Cinzel',Georgia,serif;font-weight:700;color:#fff;background:rgba(0,0,0,0.7);padding:1px 5px;border-radius:3px;pointer-events:none;}
+.pin-popup{position:absolute;z-index:20;background:#14121a;border:1px solid #C49B3C;border-radius:8px;padding:14px;width:260px;box-shadow:0 8px 32px rgba(0,0,0,0.6);transform:translate(-50%,-100%);margin-top:-24px;}
+
+.npc-tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;font-family:'Cinzel',Georgia,serif;text-transform:uppercase;letter-spacing:0.05em;cursor:pointer;}
+.tag-ally{background:rgba(91,117,83,0.15);color:#5B7553;border:1px solid rgba(91,117,83,0.3);}
+.tag-neutral{background:rgba(196,155,60,0.12);color:#C49B3C;border:1px solid rgba(196,155,60,0.25);}
+.tag-hostile{background:rgba(155,35,53,0.12);color:#9B2335;border:1px solid rgba(155,35,53,0.25);}
+.tag-unknown{background:rgba(255,255,255,0.04);color:#555;border:1px solid rgba(255,255,255,0.08);}
+
+.note-entry{background:#14121a;border:1px solid #2a2735;border-radius:8px;padding:12px;margin-bottom:8px;}
+.dice-fab{position:fixed;bottom:20px;right:16px;z-index:100;}
+.dice-main{width:56px;height:56px;border-radius:50%;border:2px solid #C49B3C;background:#14121a;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,0.5);transition:transform 0.2s;}
+.dice-opt{position:absolute;right:6px;width:44px;height:44px;border-radius:50%;cursor:pointer;font-family:'Cinzel',Georgia,serif;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.4);}
+.dice-toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#14121a;border-radius:8px;padding:14px 36px;z-index:1000;text-align:center;animation:fadeIn 0.15s ease;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+// ═══════════════════════════════════════════
+// STATE & CONFIG
+// ═══════════════════════════════════════════
+const ABILITIES=[{key:"str",label:"STR"},{key:"dex",label:"DEX"},{key:"con",label:"CON"},{key:"int",label:"INT"},{key:"wis",label:"WIS"},{key:"cha",label:"CHA"}];
+const SAVES=[{key:"save_ppd",label:"Para/Poison/Death"},{key:"save_rsw",label:"Rod/Staff/Wand"},{key:"save_pp",label:"Petrif/Polymorph"},{key:"save_bw",label:"Breath Weapon"},{key:"save_sp",label:"Spell"}];
+const DICE_DEF=[{sides:4,label:"d4",color:"#9B2335"},{sides:6,label:"d6",color:"#C49B3C"},{sides:8,label:"d8",color:"#5B7553"},{sides:10,label:"d10",color:"#9B2335"},{sides:12,label:"d12",color:"#C49B3C"},{sides:20,label:"d20",color:"#D4CCC0"}];
+const NPC_TAGS=["ally","neutral","hostile","unknown"];
+const PIN_COLORS=["#9B2335","#C49B3C","#5B7553","#7B68AE","#e85d5d","#5d8de8","#fff","#f59e0b"];
+const gold="#C49B3C",burg="#9B2335",green="#5B7553",dim="#6B6560";
+
+function emptySlots(){return Array.from({length:9},()=>({max:0,used:0,names:""}));}
+function defaultChar(){return{char_name:"",race:"",class:"",alignment:"",level:1,xp:0,next_level:2000,hp_max:0,hp_current:0,ac:10,atk_bonus:0,movement:12,str:10,dex:10,con:10,int:10,wis:10,cha:10,save_ppd:16,save_rsw:18,save_pp:17,save_bw:20,save_sp:19,weapon_prof:"",nonweapon_prof:"",class_features:"",spell_slots:emptySlots(),equipment:"",cp:0,sp:0,ep:0,gp:0,pp:0,mount:"",notes:""};}
+function defaultRet(){return{name:"",race:"",class:"",level:1,hp_current:0,hp_max:0,ac:10,atk_bonus:0,spell_slots:emptySlots(),notes:""};}
+function defaultNpc(){return{name:"",tag:"unknown",location:"",description:"",notes:"",reaction:""};}
+function defaultNote(){return{id:Date.now(),title:"",body:"",timestamp:new Date().toISOString()};}
+function defaultMount(){return{name:"",type:"",hp_current:0,hp_max:0,ac:10,movement:12,carry:"",notes:""};}
+function defaultPin(){return{id:Date.now(),x:50,y:50,name:"",notes:"",color:"#9B2335"};}
+
+const mod2e=s=>s<=3?-3:s<=5?-2:s<=8?-1:s<=12?0:s<=15?1:s<=17?2:3;
+const fmtMod=n=>n>=0?"+"+n:""+n;
+const hpColor=(c,m)=>{if(m<=0)return"#555";const p=Math.max(0,Math.min(1,c/m));return p>0.5?`hsl(${100*p},50%,40%)`:p>0.25?"#9B6A22":burg;};
+const hpPct=(c,m)=>m<=0?0:Math.max(0,Math.min(100,(c/m)*100));
+const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+const secKey=(pre,i,name)=>`${pre}-${i}-${name}`;
+
+const S={
+  tab:"party",mapTab:"world",
+  party:[defaultChar()],retainers:[],npcs:[],notes:[],mounts:[],
+  worldMap:null,regionMap:null,
+  worldToken:{x:50,y:50},regionToken:{x:50,y:50},tokenSize:14,
+  worldPins:[],regionPins:[],
+  diceOpen:false,diceLog:[],diceToast:null,
+  pinMode:null,editingPin:null,openSections:{},
+  loading:true,saved:true,
+};
+const STORE_KEY="2e-dashboard-v2";
+const MAP_KEYS={world:"2e-map-world-v2",region:"2e-map-region-v2"};
+
+function render(){document.getElementById("app").innerHTML=renderApp();bindEvents();}
+
+// ═══════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════
+function renderApp(){
+  if(S.loading)return`<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:'Cinzel',Georgia,serif;color:${gold};font-size:18px;">Loading...</div>`;
+  return`<div style="min-height:100vh;">${renderHeader()}${renderTabs()}
+    <div style="padding:12px 12px 80px;">
+      ${S.tab==="party"?renderParty():""}${S.tab==="map"?renderMapTab():""}
+      ${S.tab==="retainers"?renderRetainers():""}${S.tab==="npcs"?renderNpcs():""}
+      ${S.tab==="notes"?renderNotes():""}${S.tab==="mounts"?renderMounts():""}
+    </div>${renderDiceFAB()}${S.diceToast?renderDiceToast():""}
+  </div>`;
+}
+
+function renderHeader(){
+  return`<div style="padding:10px 14px;border-bottom:1px solid #2a2735;display:flex;align-items:center;justify-content:space-between;">
+    <div><h1 class="cin" style="font-size:20px;font-weight:800;color:${gold};letter-spacing:0.05em;">📜 AD&D 2nd Edition</h1>
+    <div data-save-status style="font-size:10px;color:#444;margin-top:1px;">Ascending AC — ${S.saved?"✓ Saved":"Saving..."}</div></div>
+    <div class="flex gap6">
+      <button onclick="exportData()" class="cin" style="padding:5px 10px;background:rgba(196,155,60,0.1);border:1px solid ${gold}25;border-radius:5px;color:${gold};cursor:pointer;font-size:11px;font-weight:600;">↓ Export</button>
+      <button onclick="document.getElementById('imp').click()" class="cin" style="padding:5px 10px;background:rgba(91,117,83,0.1);border:1px solid rgba(91,117,83,0.25);border-radius:5px;color:${green};cursor:pointer;font-size:11px;font-weight:600;">↑ Import</button>
+      <input id="imp" type="file" accept=".json" onchange="handleImport(event)" style="display:none;"/>
+    </div>
+  </div>`;
+}
+
+function renderTabs(){
+  const tabs=[{id:"party",icon:"⚔️",label:"Party"},{id:"map",icon:"🗺️",label:"Map"},{id:"retainers",icon:"🛡️",label:"Retainers"},{id:"npcs",icon:"🎭",label:"NPCs"},{id:"notes",icon:"📜",label:"Journal"},{id:"mounts",icon:"🐴",label:"Mounts"}];
+  return`<div class="tab-bar">${tabs.map(t=>`<button class="tab-btn" style="border-bottom-color:${S.tab===t.id?gold:'transparent'};color:${S.tab===t.id?gold:'#555'};" onclick="setTab('${t.id}')">${t.icon} ${t.label}</button>`).join("")}</div>`;
+}
+
+// ── PARTY ──
+function renderParty(){
+  return`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:12px;">
+    ${S.party.map((c,i)=>renderCharCard(c,i)).join("")}</div>
+    ${S.party.length<8?`<button class="add-btn" onclick="addChar()">+ Add Character</button>`:""}`;
+}
+
+function renderCharCard(c,i){
+  const col=hpColor(c.hp_current,c.hp_max);const pct=hpPct(c.hp_current,c.hp_max);
+  return`<div class="card">
+    <div style="margin-bottom:10px;border-bottom:1px solid #2a2735;padding-bottom:8px;">
+      <div class="flex gap8">
+        <input value="${esc(c.char_name)}" onchange="updateChar(${i},'char_name',this.value)" placeholder="Character ${i+1}"
+          style="flex:1;background:transparent;border:none;color:${gold};font-size:22px;font-family:'Cinzel',Georgia,serif;font-weight:700;outline:none;letter-spacing:0.03em;"/>
+        ${S.party.length>1?`<button class="remove-btn" onclick="removeChar(${i})">✕</button>`:""}
+      </div>
+      <div class="flex gap8" style="margin-top:3px;font-size:12px;color:${dim};">
+        <span>${esc(c.race)||"Race"}</span><span>·</span><span>${esc(c.class)||"Class"}</span><span>·</span><span>Lvl ${c.level}</span>
+        ${c.alignment?`<span>·</span><span>${esc(c.alignment)}</span>`:""}
+      </div>
+    </div>
+    <div class="mb10">
+      <div class="flex gap8 mb4">
+        <span class="cin" style="font-size:11px;color:${dim};font-weight:700;">HP</span>
+        <span class="cin" style="font-size:20px;font-weight:800;color:${col};">${c.hp_current}</span>
+        <span style="color:#333;">/</span><span style="font-size:14px;color:${dim};">${c.hp_max}</span>
+        <div style="flex:1;"></div>
+        <span class="cin" style="font-size:12px;color:${dim};">AC <strong style="color:#D4CCC0;font-size:16px;">${c.ac}</strong></span>
+        <span class="cin" style="font-size:12px;color:${dim};margin-left:8px;">ATK <strong style="color:#D4CCC0;font-size:16px;">+${c.atk_bonus}</strong></span>
+      </div>
+      <div class="hp-bar-track"><div class="hp-bar-fill" style="width:${pct}%;background:${col};"></div></div>
+      <div class="flex gap4">
+        <button class="hp-minus" onclick="updateChar(${i},'hp_current',Math.max(0,${c.hp_current}-1));render();">−1</button>
+        <button class="hp-plus" onclick="updateChar(${i},'hp_current',Math.min(${c.hp_max},${c.hp_current}+1));render();">+1</button>
+        <button class="hp-rest" onclick="restChar(${i})">Rest</button>
+      </div>
+    </div>
+    ${renderSection("ch",i,"combat","⚔️","Combat",burg,`
+      <div class="grid3">${field("HP Max",c.hp_max,"number",`updateChar(${i},'hp_max',+this.value)`)}${field("AC (Asc.)",c.ac,"number",`updateChar(${i},'ac',+this.value)`)}${field("Atk Bonus",c.atk_bonus,"number",`updateChar(${i},'atk_bonus',+this.value)`)}</div>
+      ${field("Movement Rate",c.movement,"number",`updateChar(${i},'movement',+this.value)`)}
+    `)}
+    ${renderSection("ch",i,"identity","📜","Identity",gold,`
+      ${field("Name",c.char_name,"text",`updateChar(${i},'char_name',this.value)`)}
+      <div class="grid2">${field("Race",c.race,"text",`updateChar(${i},'race',this.value)`)}${field("Class",c.class,"text",`updateChar(${i},'class',this.value)`)}</div>
+      <div class="grid2">${field("Alignment",c.alignment,"text",`updateChar(${i},'alignment',this.value)`)}${field("Level",c.level,"number",`updateChar(${i},'level',+this.value)`)}</div>
+      <div class="grid2">${field("XP",c.xp,"number",`updateChar(${i},'xp',+this.value)`)}${field("Next Level",c.next_level,"number",`updateChar(${i},'next_level',+this.value)`)}</div>
+    `)}
+    ${renderSection("ch",i,"abilities","📊","Abilities",green,`
+      <div class="grid2" style="gap:5px;">${ABILITIES.map(a=>{
+        const m=mod2e(c[a.key]);const mc=m>0?green:m===0?"#555":burg;
+        return`<div class="flex gap6" style="padding:5px 8px;background:rgba(196,155,60,0.02);border-radius:5px;">
+          <span class="cin" style="font-size:11px;font-weight:800;color:${dim};width:28px;">${a.label}</span>
+          <input class="inp inp-sm" type="number" value="${c[a.key]}" onchange="updateChar(${i},'${a.key}',+this.value)"/>
+          <span style="font-size:15px;font-weight:800;min-width:28px;text-align:center;color:${mc};">${fmtMod(m)}</span>
+        </div>`;}).join("")}</div>
+    `)}
+    ${renderSection("ch",i,"saves","🛡️","Saving Throws",gold,`
+      <div class="grid2" style="gap:5px;">${SAVES.map(s=>`<div class="flex gap6" style="padding:5px 8px;background:rgba(196,155,60,0.02);border-radius:5px;">
+        <span style="font-size:9px;color:${dim};flex:1;font-weight:600;">${s.label}</span>
+        <input class="inp inp-sm" type="number" value="${c[s.key]}" onchange="updateChar(${i},'${s.key}',+this.value)"/>
+      </div>`).join("")}</div>
+    `)}
+    ${renderSection("ch",i,"spells","✨","Spells","#7B68AE",renderSpellSlots(c.spell_slots,"ch",i))}
+    ${renderSection("ch",i,"prof","📖","Proficiencies",gold,`
+      ${textArea("Weapon Proficiencies",c.weapon_prof,`updateChar(${i},'weapon_prof',this.value)`)}
+      ${textArea("Non-Weapon Proficiencies",c.nonweapon_prof,`updateChar(${i},'nonweapon_prof',this.value)`)}
+    `)}
+    ${renderSection("ch",i,"features","⭐","Class Features",green,`
+      ${textArea("Features & Special Abilities",c.class_features,`updateChar(${i},'class_features',this.value)`)}
+    `)}
+    ${renderSection("ch",i,"inv","🎒","Inventory",burg,`
+      <div class="flex gap6 mb8">${[{k:"pp",l:"PP"},{k:"gp",l:"GP"},{k:"ep",l:"EP"},{k:"sp",l:"SP"},{k:"cp",l:"CP"}].map(c2=>
+        `<div style="flex:1;text-align:center;"><label class="lbl" style="font-size:9px;">${c2.l}</label>
+        <input class="inp inp-sm" type="number" value="${c[c2.k]||0}" onchange="updateChar(${i},'${c2.k}',+this.value)" style="width:100%;"/></div>`).join("")}</div>
+      ${textArea("Equipment",c.equipment,`updateChar(${i},'equipment',this.value)`)}
+      ${field("Mount / Animal",c.mount,"text",`updateChar(${i},'mount',this.value)`)}
+    `)}
+    ${renderSection("ch",i,"notes","📝","Notes",dim,`
+      ${textArea("Notes",c.notes,`updateChar(${i},'notes',this.value)`)}
+    `)}
+  </div>`;
+}
+
+// ── RETAINERS ──
+function renderRetainers(){
+  if(S.retainers.length===0)return`<div style="text-align:center;padding:40px;color:#333;"><div style="font-size:32px;margin-bottom:12px;">🛡️</div><div class="cin" style="color:${dim};">No retainers hired</div></div><button class="add-btn" onclick="addRet()">+ Add Retainer</button>`;
+  return S.retainers.map((r,i)=>`<div class="card">
+    <div class="flex gap8 mb8">
+      <input value="${esc(r.name)}" onchange="updateRet(${i},'name',this.value)" placeholder="Retainer ${i+1}"
+        style="flex:1;background:transparent;border:none;color:${gold};font-size:16px;font-family:'Cinzel',Georgia,serif;font-weight:700;outline:none;"/>
+      <button class="remove-btn" onclick="removeRet(${i})">✕</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;" class="mb8">
+      ${field("Class",r.class,"text",`updateRet(${i},'class',this.value)`)}${field("Level",r.level,"number",`updateRet(${i},'level',+this.value)`)}
+      ${field("AC",r.ac,"number",`updateRet(${i},'ac',+this.value)`)}${field("ATK",r.atk_bonus,"number",`updateRet(${i},'atk_bonus',+this.value)`)}
+    </div>
+    <div class="flex gap8 mb6">
+      <span class="cin" style="font-size:11px;color:${dim};font-weight:700;">HP</span>
+      <input class="inp inp-sm" type="number" value="${r.hp_current}" onchange="updateRet(${i},'hp_current',+this.value)"/>
+      <span style="color:#333;">/</span>
+      <input class="inp inp-sm" type="number" value="${r.hp_max}" onchange="updateRet(${i},'hp_max',+this.value)"/>
+    </div>
+    <div class="hp-bar-track"><div class="hp-bar-fill" style="width:${hpPct(r.hp_current,r.hp_max)}%;background:${hpColor(r.hp_current,r.hp_max)};"></div></div>
+    ${renderSection("ret",i,"spells","✨","Spells","#7B68AE",renderSpellSlots(r.spell_slots,"ret",i))}
+    ${textArea("Notes",r.notes,`updateRet(${i},'notes',this.value)`)}
+  </div>`).join("")+`<button class="add-btn" onclick="addRet()">+ Add Retainer</button>`;
+}
+
+// ── NPCs ──
+function renderNpcs(){
+  if(S.npcs.length===0)return`<div style="text-align:center;padding:40px;color:#333;"><div style="font-size:32px;margin-bottom:12px;">🎭</div><div class="cin" style="color:${dim};">No NPCs encountered</div></div><button class="add-btn" onclick="addNpc()">+ Add NPC</button>`;
+  return S.npcs.map((n,i)=>`<div class="card">
+    <div class="flex gap8 mb8">
+      <input value="${esc(n.name)}" onchange="updateNpc(${i},'name',this.value)" placeholder="NPC ${i+1}"
+        style="flex:1;background:transparent;border:none;color:${gold};font-size:16px;font-family:'Cinzel',Georgia,serif;font-weight:700;outline:none;"/>
+      <div class="flex gap4">${NPC_TAGS.map(t=>`<button class="npc-tag tag-${t}" style="opacity:${n.tag===t?1:0.3};" onclick="updateNpc(${i},'tag','${t}');render();">${t}</button>`).join("")}</div>
+      <button class="remove-btn" onclick="removeNpc(${i})">✕</button>
+    </div>
+    <div class="grid2 mb8">${field("Location",n.location,"text",`updateNpc(${i},'location',this.value)`)}${field("Reaction",n.reaction,"text",`updateNpc(${i},'reaction',this.value)`)}</div>
+    ${textArea("Description",n.description,`updateNpc(${i},'description',this.value)`)}
+    ${textArea("Notes",n.notes,`updateNpc(${i},'notes',this.value)`)}
+  </div>`).join("")+`<button class="add-btn" onclick="addNpc()">+ Add NPC</button>`;
+}
+
+// ── NOTES ──
+function renderNotes(){
+  return`<button class="add-btn" style="margin-top:0;margin-bottom:12px;" onclick="addNote()">+ New Entry</button>
+  ${S.notes.length===0?`<div style="text-align:center;padding:40px;color:#333;"><div style="font-size:32px;margin-bottom:12px;">📜</div><div class="cin" style="color:${dim};">No journal entries yet</div></div>`:""}
+  ${S.notes.slice().reverse().map((n,ri)=>{
+    const i=S.notes.length-1-ri;const d=new Date(n.timestamp);
+    return`<div class="note-entry">
+      <div class="flex gap8 mb6" style="justify-content:space-between;">
+        <input value="${esc(n.title)}" onchange="updateNote(${i},'title',this.value)" placeholder="Entry title..."
+          style="flex:1;background:transparent;border:none;color:${gold};font-size:15px;font-family:'Cinzel',Georgia,serif;font-weight:700;outline:none;"/>
+        <span class="cin" style="font-size:10px;color:#444;">${d.toLocaleDateString("en-US",{month:"short",day:"numeric"})}</span>
+        <button class="remove-btn" onclick="removeNote(${i})">✕</button>
+      </div>
+      <textarea class="inp ta" rows="4" onchange="updateNote(${i},'body',this.value)" placeholder="Session notes...">${esc(n.body)}</textarea>
+    </div>`;}).join("")}`;
+}
+
+// ── MOUNTS ──
+function renderMounts(){
+  if(S.mounts.length===0)return`<div style="text-align:center;padding:40px;color:#333;"><div style="font-size:32px;margin-bottom:12px;">🐴</div><div class="cin" style="color:${dim};">No mounts or animals</div></div><button class="add-btn" onclick="addMount()">+ Add Mount / Animal</button>`;
+  return S.mounts.map((a,i)=>`<div class="card">
+    <div class="flex gap8 mb8">
+      <input value="${esc(a.name)}" onchange="updateMount(${i},'name',this.value)" placeholder="Mount ${i+1}"
+        style="flex:1;background:transparent;border:none;color:${gold};font-size:16px;font-family:'Cinzel',Georgia,serif;font-weight:700;outline:none;"/>
+      <button class="remove-btn" onclick="removeMount(${i})">✕</button>
+    </div>
+    <div class="grid3 mb8">${field("Type",a.type,"text",`updateMount(${i},'type',this.value)`)}${field("Movement",a.movement,"number",`updateMount(${i},'movement',+this.value)`)}${field("Carry",a.carry,"text",`updateMount(${i},'carry',this.value)`)}</div>
+    <div class="flex gap8 mb6">
+      <span class="cin" style="font-size:11px;color:${dim};font-weight:700;">HP</span>
+      <input class="inp inp-sm" type="number" value="${a.hp_current}" onchange="updateMount(${i},'hp_current',+this.value)"/>
+      <span style="color:#333;">/</span>
+      <input class="inp inp-sm" type="number" value="${a.hp_max}" onchange="updateMount(${i},'hp_max',+this.value)"/>
+      <div style="flex:1;"></div>
+      <span class="cin" style="font-size:11px;color:${dim};">AC</span>
+      <input class="inp inp-sm" type="number" value="${a.ac}" onchange="updateMount(${i},'ac',+this.value)"/>
+    </div>
+    <div class="hp-bar-track"><div class="hp-bar-fill" style="width:${hpPct(a.hp_current,a.hp_max)}%;background:${hpColor(a.hp_current,a.hp_max)};"></div></div>
+    ${textArea("Notes",a.notes,`updateMount(${i},'notes',this.value)`)}
+  </div>`).join("")+`<button class="add-btn" onclick="addMount()">+ Add Mount / Animal</button>`;
+}
+// ── MAP TAB ──
+function renderMapTab(){
+  const which=S.mapTab;const mapSrc=which==="world"?S.worldMap:S.regionMap;
+  const tokPos=which==="world"?S.worldToken:S.regionToken;const pins=which==="world"?S.worldPins:S.regionPins;
+  return`<div class="flex gap6 mb10">
+    ${[{id:"world",icon:"🌍",label:"World"},{id:"region",icon:"🗺️",label:"Region"}].map(t=>
+      `<button class="tab-btn" style="border-radius:5px;border:1px solid ${S.mapTab===t.id?gold+'25':"rgba(255,255,255,0.05)"};background:${S.mapTab===t.id?gold+'10':"rgba(255,255,255,0.02)"};color:${S.mapTab===t.id?gold:"#555"};" onclick="S.mapTab='${t.id}';S.editingPin=null;render();">${t.icon} ${t.label}</button>`
+    ).join("")}</div>
+  ${mapSrc?renderMapView(mapSrc,tokPos,pins,which):renderMapUpload(which)}`;
+}
+function renderMapUpload(which){
+  return`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:300px;background:#14121a;border:2px dashed #2a2735;border-radius:8px;padding:32px;text-align:center;">
+    <div style="font-size:48px;margin-bottom:16px;">🗺️</div>
+    <div class="cin" style="font-size:16px;color:${gold};margin-bottom:8px;">Upload Your ${which==="world"?"World":"Region"} Map</div>
+    <div style="font-size:13px;color:${dim};margin-bottom:20px;">SVG, PNG, or JPG</div>
+    <input id="map-up-${which}" type="file" accept="image/*,.svg" onchange="handleMapUpload(event,'${which}')" style="display:none;"/>
+    <button onclick="document.getElementById('map-up-${which}').click()" class="cin" style="padding:10px 24px;background:rgba(196,155,60,0.1);border:1px solid ${gold}44;border-radius:6px;color:${gold};cursor:pointer;font-size:14px;font-weight:700;">Choose Map File</button>
+  </div>`;
+}
+function renderMapView(mapSrc,tokPos,pins,which){
+  const isPinMode=S.pinMode===which;
+  return`<div class="flex mb8" style="justify-content:space-between;flex-wrap:wrap;gap:6px;">
+    <div class="flex gap4">
+      <button onclick="mapZoom(-0.25)" style="width:28px;height:28px;background:rgba(196,155,60,0.06);border:1px solid ${gold}22;border-radius:5px;color:${gold};cursor:pointer;font-size:16px;font-weight:700;">−</button>
+      <span class="cin" id="zoom-label" style="font-size:11px;color:${dim};min-width:36px;text-align:center;">100%</span>
+      <button onclick="mapZoom(0.25)" style="width:28px;height:28px;background:rgba(196,155,60,0.06);border:1px solid ${gold}22;border-radius:5px;color:${gold};cursor:pointer;font-size:16px;font-weight:700;">+</button>
+      <button onclick="mapFit()" style="padding:4px 8px;background:rgba(196,155,60,0.04);border:1px solid ${gold}11;border-radius:5px;color:#555;cursor:pointer;font-size:10px;">Fit</button>
+    </div>
+    <div class="flex gap6">
+      <button onclick="togglePinMode('${which}')" class="cin" style="padding:4px 10px;background:${isPinMode?"rgba(155,35,53,0.2)":"rgba(155,35,53,0.08)"};border:1px solid ${isPinMode?"rgba(155,35,53,0.5)":"rgba(155,35,53,0.2)"};border-radius:5px;color:${burg};cursor:pointer;font-size:11px;font-weight:700;">${isPinMode?"✕ Cancel":"📌 Add Pin"}</button>
+      <input type="range" min="8" max="40" value="${S.tokenSize}" oninput="S.tokenSize=+this.value;" style="width:50px;accent-color:${gold};"/>
+      <input id="map-sw-${which}" type="file" accept="image/*,.svg" onchange="handleMapUpload(event,'${which}')" style="display:none;"/>
+      <button onclick="document.getElementById('map-sw-${which}').click()" style="padding:4px 10px;background:rgba(196,155,60,0.04);border:1px solid ${gold}11;border-radius:5px;color:${dim};cursor:pointer;font-size:11px;">Swap</button>
+      <button onclick="removeMap('${which}')" style="padding:4px 10px;background:rgba(155,35,53,0.08);border:1px solid rgba(155,35,53,0.15);border-radius:5px;color:${burg};cursor:pointer;font-size:11px;">Remove</button>
+    </div>
+  </div>
+  ${isPinMode?`<div style="padding:8px 12px;background:rgba(155,35,53,0.08);border:1px solid rgba(155,35,53,0.2);border-radius:8px;margin-bottom:8px;text-align:center;font-size:13px;color:${burg};">📌 Click the map to place a pin</div>`:""}
+  <div id="map-container" style="border-radius:8px;overflow:auto;border:1px solid #2a2735;background:#0a0a10;max-height:calc(100vh - 220px);-webkit-overflow-scrolling:touch;">
+    <div id="map-inner" style="position:relative;width:100%;">
+      <img id="map-img" src="${mapSrc}" alt="Map" style="width:100%;display:block;pointer-events:none;user-select:none;"/>
+      <div id="party-token" style="position:absolute;left:${tokPos.x}%;top:${tokPos.y}%;transform:translate(-50%,-50%);width:${S.tokenSize}px;height:${S.tokenSize}px;border-radius:50%;background:radial-gradient(circle at 40% 35%,${gold},#8B6914);border:${Math.max(1,Math.round(S.tokenSize/9))}px solid #fff;cursor:grab;box-shadow:0 2px 8px rgba(0,0,0,0.6),0 0 12px ${gold}33;display:flex;align-items:center;justify-content:center;font-size:${Math.max(6,Math.round(S.tokenSize*0.45))}px;font-weight:800;color:#14121a;font-family:'Cinzel',Georgia,serif;z-index:10;touch-action:none;user-select:none;">⚑</div>
+      ${pins.map((p,pi)=>`<div class="map-pin" style="left:${p.x}%;top:${p.y}%;" onclick="event.stopPropagation();openPinEdit('${which}',${pi});">
+        <div class="map-pin-label">${esc(p.name||"Pin")}</div>
+        <div class="map-pin-icon" style="border-top-color:${p.color||burg};"></div>
+      </div>`).join("")}
+      ${S.editingPin!==null?renderPinPopup(which):""}
+    </div>
+  </div>
+  ${pins.length>0?`<div style="margin-top:10px;">
+    <div class="cin" style="font-size:11px;color:${dim};font-weight:700;text-transform:uppercase;margin-bottom:6px;">📌 Pins (${pins.length})</div>
+    ${pins.map((p,pi)=>`<div class="flex gap8" style="padding:5px 8px;background:rgba(196,155,60,0.02);border-radius:5px;margin-bottom:3px;cursor:pointer;" onclick="openPinEdit('${which}',${pi});">
+      <div style="width:8px;height:8px;border-radius:2px;background:${p.color||burg};"></div>
+      <span style="flex:1;font-size:13px;">${esc(p.name||"Unnamed pin")}</span>
+      <span style="font-size:11px;color:#555;">${p.notes?(p.notes.substring(0,30)+(p.notes.length>30?"...":"")):"" }</span>
+    </div>`).join("")}
+  </div>`:""}`;
+}
+function renderPinPopup(which){
+  const pins=which==="world"?S.worldPins:S.regionPins;
+  const pi=S.editingPin;if(pi===null||pi>=pins.length)return"";const p=pins[pi];
+  return`<div class="pin-popup" style="left:${p.x}%;top:${p.y}%;" onclick="event.stopPropagation();">
+    <div class="flex gap8 mb8" style="justify-content:space-between;">
+      <span class="cin" style="font-size:12px;color:${gold};font-weight:700;">Edit Pin</span>
+      <div class="flex gap4">
+        <button onclick="removePin('${which}',${pi})" class="remove-btn">Delete</button>
+        <button onclick="S.editingPin=null;render();" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:5px;color:${dim};cursor:pointer;padding:3px 8px;font-size:11px;">✕</button>
+      </div>
+    </div>
+    ${field("Name",p.name,"text",`updatePin('${which}',${pi},'name',this.value)`)}
+    <div class="mb8"><label class="lbl">Color</label>
+      <div class="flex gap4">${PIN_COLORS.map(c=>`<div onclick="updatePin('${which}',${pi},'color','${c}');render();" style="width:18px;height:18px;border-radius:50%;background:${c};cursor:pointer;border:2px solid ${p.color===c?"#fff":"transparent"};"></div>`).join("")}</div>
+    </div>
+    ${textArea("Notes",p.notes,`updatePin('${which}',${pi},'notes',this.value)`)}
+  </div>`;
+}
+
+// ── SHARED ──
+function field(label,value,type,onchange){
+  return`<div class="mb8"><label class="lbl">${label}</label>
+    <input class="inp${type==="number"?" inp-sm":""}" type="${type==="number"?"number":"text"}" value="${esc(value)}" onchange="${onchange}" ${type==="number"?'style="width:100%;text-align:center;font-weight:700;"':""}/></div>`;
+}
+function textArea(label,value,onchange){
+  return`<div class="mb8"><label class="lbl">${label}</label>
+    <textarea class="inp ta" rows="3" onchange="${onchange}">${esc(value)}</textarea></div>`;
+}
+function renderSection(prefix,index,name,icon,title,accent,content){
+  const key=secKey(prefix,index,name);const open=!!S.openSections[key];
+  return`<div class="mb6"><button class="section-btn" style="color:${accent};" onclick="toggleSection('${key}')">
+    <span>${icon}</span><span style="flex:1;text-align:left;">${title}</span>
+    <span style="font-size:9px;opacity:0.4;">${open?"▼":"▶"}</span>
+  </button>${open?`<div class="section-body" style="border-left:2px solid ${accent}22;">${content}</div>`:""}</div>`;
+}
+function renderSpellSlots(slots,prefix,ci){
+  const safe=slots&&slots.length===9?slots:emptySlots();
+  return safe.map((slot,i)=>{
+    const active=slot.max>0;const avail=slot.max-slot.used;
+    return`<div style="margin-bottom:${active?10:2}px;">
+      <div class="flex gap4" style="flex-wrap:wrap;">
+        <span class="cin" style="font-size:11px;font-weight:700;color:${active?gold:"#2a2735"};width:36px;">Lvl ${i+1}</span>
+        ${active?`<button class="slot-btn" onclick="adjustSlotMax('${prefix}',${ci},${i},-1)">−</button>`:""}
+        ${Array.from({length:slot.max},(_,j)=>{const filled=j<avail;
+          return`<div class="slot-dot ${filled?"filled":""}" onclick="toggleSlotUse('${prefix}',${ci},${i},${filled})"></div>`;}).join("")}
+        <button class="slot-btn" onclick="adjustSlotMax('${prefix}',${ci},${i},1)">+</button>
+      </div>
+      ${active?`<input class="inp" style="font-size:12px;margin-top:4px;padding:5px 8px;" placeholder="Memorized spells..." value="${esc(slot.names||"")}" onchange="updateSlotNames('${prefix}',${ci},${i},this.value)"/>`:""}
+    </div>`;}).join("");
+}
+
+// ── DICE ──
+function renderDiceFAB(){
+  const open=S.diceOpen;
+  return`<div class="dice-fab">
+    ${open&&S.diceLog.length>0?`<div style="position:absolute;bottom:64px;right:56px;width:170px;max-height:220px;overflow-y:auto;background:#14121a;border:1px solid #2a2735;border-radius:8px;padding:8px;">
+      <div class="flex" style="justify-content:space-between;margin-bottom:4px;">
+        <span class="cin" style="font-size:9px;color:#555;text-transform:uppercase;letter-spacing:0.08em;">Roll Log</span>
+        <button onclick="S.diceLog=[];render();" style="background:rgba(155,35,53,0.1);border:1px solid rgba(155,35,53,0.15);border-radius:4px;color:${burg};cursor:pointer;padding:1px 6px;font-size:9px;">Clear</button>
+      </div>
+      ${S.diceLog.slice().reverse().map(r=>`<div class="flex" style="justify-content:space-between;padding:3px 4px;font-size:12px;border-bottom:1px solid rgba(196,155,60,0.04);">
+        <span class="cin" style="font-weight:700;color:${dim};">${r.label}</span>
+        <span style="font-weight:800;color:${r.color};">${r.result}</span>
+      </div>`).join("")}
+    </div>`:""}
+    ${open?DICE_DEF.slice().reverse().map((d,i)=>`<button class="dice-opt" onclick="rollDice(${d.sides},'${d.color}','${d.label}')" style="bottom:${64+i*46}px;background:${d.color}20;border:2px solid ${d.color}44;color:${d.color};">${d.label}</button>`).join(""):""}
+    <button class="dice-main" onclick="S.diceOpen=!S.diceOpen;render();" style="transform:${open?"rotate(45deg)":"none"};"><svg width="28" height="28" viewBox="0 0 100 100" fill="none" stroke="${gold}" stroke-width="5" stroke-linejoin="round"><polygon points="50,5 95,30 95,70 50,95 5,70 5,30"/><line x1="50" y1="5" x2="50" y2="95"/><line x1="5" y1="30" x2="95" y2="70"/><line x1="95" y1="30" x2="5" y2="70"/><polygon points="50,5 95,70 5,70" stroke-width="4"/></svg></button>
+  </div>`;
+}
+function renderDiceToast(){
+  const d=S.diceToast;const isCrit=d.sides===20&&d.result===20;const isFumble=d.sides===20&&d.result===1;
+  return`<div class="dice-toast" style="border:2px solid ${isCrit?gold:isFumble?burg:d.color};box-shadow:0 8px 32px rgba(0,0,0,0.6),0 0 20px ${d.color}33;">
+    <div class="cin" style="font-size:11px;color:${dim};">d${d.sides}</div>
+    <div class="cin" style="font-size:44px;font-weight:800;color:${isCrit?"#4ae46e":isFumble?burg:d.color};">${d.result}</div>
+    ${isCrit?`<div style="font-size:11px;color:#4ae46e;">CRITICAL HIT!</div>`:""}
+    ${isFumble?`<div style="font-size:11px;color:${burg};">FUMBLE!</div>`:""}
+  </div>`;
+}
+
+// ═══════════════════════════════════════════
+// ACTIONS
+// ═══════════════════════════════════════════
+function setTab(t){S.tab=t;S.editingPin=null;render();}
+function toggleSection(key){S.openSections[key]=!S.openSections[key];render();}
+function updateChar(i,f,v){S.party[i][f]=v;scheduleSave();}
+function addChar(){if(S.party.length<8){S.party.push(defaultChar());scheduleSave();render();}}
+function removeChar(i){if(S.party.length>1){S.party.splice(i,1);scheduleSave();render();}}
+function restChar(i){S.party[i].hp_current=S.party[i].hp_max;S.party[i].spell_slots=(S.party[i].spell_slots||emptySlots()).map(s=>({...s,used:0}));scheduleSave();render();}
+function updateRet(i,f,v){S.retainers[i][f]=v;scheduleSave();}
+function addRet(){if(S.retainers.length<12){S.retainers.push(defaultRet());scheduleSave();render();}}
+function removeRet(i){S.retainers.splice(i,1);scheduleSave();render();}
+function updateNpc(i,f,v){S.npcs[i][f]=v;scheduleSave();}
+function addNpc(){S.npcs.push(defaultNpc());scheduleSave();render();}
+function removeNpc(i){S.npcs.splice(i,1);scheduleSave();render();}
+function updateNote(i,f,v){S.notes[i][f]=v;scheduleSave();}
+function addNote(){S.notes.push(defaultNote());scheduleSave();render();}
+function removeNote(i){S.notes.splice(i,1);scheduleSave();render();}
+function updateMount(i,f,v){S.mounts[i][f]=v;scheduleSave();}
+function addMount(){S.mounts.push(defaultMount());scheduleSave();render();}
+function removeMount(i){S.mounts.splice(i,1);scheduleSave();render();}
+
+function adjustSlotMax(prefix,ci,si,delta){
+  const arr=prefix==="ch"?S.party:S.retainers;const slots=arr[ci].spell_slots||emptySlots();
+  slots[si].max=Math.max(0,Math.min(9,slots[si].max+delta));slots[si].used=Math.min(slots[si].used,slots[si].max);
+  arr[ci].spell_slots=slots;scheduleSave();render();
+}
+function toggleSlotUse(prefix,ci,si,wasFilled){
+  const arr=prefix==="ch"?S.party:S.retainers;const slots=arr[ci].spell_slots||emptySlots();
+  if(wasFilled)slots[si].used=Math.min(slots[si].max,slots[si].used+1);else slots[si].used=Math.max(0,slots[si].used-1);
+  arr[ci].spell_slots=slots;scheduleSave();render();
+}
+function updateSlotNames(prefix,ci,si,v){const arr=prefix==="ch"?S.party:S.retainers;(arr[ci].spell_slots||emptySlots())[si].names=v;scheduleSave();}
+
+let currentZoom=1;
+function mapZoom(delta){currentZoom=Math.max(0.25,Math.min(4,currentZoom+delta));applyZoom();}
+function applyZoom(){const el=document.getElementById("map-inner");if(el)el.style.width=`${currentZoom*100}%`;const lbl=document.getElementById("zoom-label");if(lbl)lbl.textContent=Math.round(currentZoom*100)+"%";}
+function mapFit(){const img=document.getElementById("map-img");const cont=document.getElementById("map-container");if(!img||!img.naturalWidth||!cont)return;const aW=cont.clientWidth;const aH=window.innerHeight-220;const ratio=img.naturalHeight/img.naturalWidth;const hFull=aW*ratio;currentZoom=hFull<=aH?1:Math.max(0.25,aH/hFull);applyZoom();}
+function handleMapUpload(e,which){const file=e.target.files?.[0];if(!file)return;const r=new FileReader();r.onload=ev=>{if(which==="world")S.worldMap=ev.target.result;else S.regionMap=ev.target.result;currentZoom=1;render();setTimeout(mapFit,100);saveMap(which);};r.readAsDataURL(file);}
+function removeMap(which){if(which==="world")S.worldMap=null;else S.regionMap=null;S.editingPin=null;render();saveMap(which);}
+function togglePinMode(which){S.pinMode=S.pinMode===which?null:which;S.editingPin=null;render();}
+function handleMapClick(e){const which=S.pinMode;if(!which)return;const img=document.getElementById("map-img");if(!img)return;const rect=img.getBoundingClientRect();const x=Math.max(0,Math.min(100,((e.clientX-rect.left)/rect.width)*100));const y=Math.max(0,Math.min(100,((e.clientY-rect.top)/rect.height)*100));const pin=defaultPin();pin.x=x;pin.y=y;pin.name="New Pin";const arr=which==="world"?S.worldPins:S.regionPins;arr.push(pin);S.pinMode=null;S.editingPin=arr.length-1;scheduleSave();render();}
+function openPinEdit(which,pi){if(S.mapTab!==which)S.mapTab=which;S.editingPin=pi;render();}
+function updatePin(which,pi,field,value){(which==="world"?S.worldPins:S.regionPins)[pi][field]=value;scheduleSave();}
+function removePin(which,pi){(which==="world"?S.worldPins:S.regionPins).splice(pi,1);S.editingPin=null;scheduleSave();render();}
+function rollDice(sides,color,label){const result=Math.floor(Math.random()*sides)+1;S.diceToast={result,sides,color};S.diceLog.push({result,sides,color,label});if(S.diceLog.length>20)S.diceLog=S.diceLog.slice(-20);render();setTimeout(()=>{S.diceToast=null;render();},2200);}
+
+function exportData(){
+  const data={party:S.party,retainers:S.retainers,npcs:S.npcs,notes:S.notes,mounts:S.mounts,worldToken:S.worldToken,regionToken:S.regionToken,tokenSize:S.tokenSize,worldMap:S.worldMap,regionMap:S.regionMap,worldPins:S.worldPins,regionPins:S.regionPins};
+  const blob=new Blob([JSON.stringify(data)],{type:"application/json"});const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");a.href=url;a.download=`adnd2e-${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(url);
+}
+function handleImport(e){
+  const file=e.target.files?.[0];if(!file)return;const reader=new FileReader();
+  reader.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(!d.party){alert("Invalid save file.");return;}
+    if(!confirm("Overwrite all current data?"))return;
+    S.party=d.party.map(c=>({...defaultChar(),...c}));S.retainers=(d.retainers||[]).map(r=>({...defaultRet(),...r}));
+    S.npcs=d.npcs||[];S.notes=d.notes||[];S.mounts=d.mounts||[];
+    if(d.worldToken)S.worldToken=d.worldToken;if(d.regionToken)S.regionToken=d.regionToken;
+    if(d.tokenSize)S.tokenSize=d.tokenSize;
+    if(d.worldMap!==undefined)S.worldMap=d.worldMap;if(d.regionMap!==undefined)S.regionMap=d.regionMap;
+    if(d.worldPins)S.worldPins=d.worldPins;if(d.regionPins)S.regionPins=d.regionPins;
+    scheduleSave();saveMap("world");saveMap("region");render();
+  }catch(err){alert("Failed to read save file.");}};reader.readAsText(file);e.target.value="";
+}
+
+// ═══════════════════════════════════════════
+// SAVE / LOAD
+// ═══════════════════════════════════════════
+let saveTimer=null;
+function scheduleSave(){S.saved=false;clearTimeout(saveTimer);
+  saveTimer=setTimeout(()=>{try{const data={party:S.party,retainers:S.retainers,npcs:S.npcs,notes:S.notes,mounts:S.mounts,worldToken:S.worldToken,regionToken:S.regionToken,tokenSize:S.tokenSize,worldPins:S.worldPins,regionPins:S.regionPins};
+    localStorage.setItem(STORE_KEY,JSON.stringify(data));S.saved=true;
+    const el=document.querySelector("[data-save-status]");if(el)el.textContent="✓ Saved";
+  }catch(e){}},800);
+}
+function saveMap(which){try{const key=MAP_KEYS[which];const data=which==="world"?S.worldMap:S.regionMap;if(data)localStorage.setItem(key,data);else localStorage.removeItem(key);}catch(e){}}
+function loadAll(){
+  try{const raw=localStorage.getItem(STORE_KEY);if(raw){const d=JSON.parse(raw);
+    if(d.party)S.party=d.party.map(c=>({...defaultChar(),...c}));
+    if(d.retainers)S.retainers=d.retainers.map(r=>({...defaultRet(),...r}));
+    if(d.npcs)S.npcs=d.npcs;if(d.notes)S.notes=d.notes;if(d.mounts)S.mounts=d.mounts;
+    if(d.worldToken)S.worldToken=d.worldToken;if(d.regionToken)S.regionToken=d.regionToken;
+    if(d.tokenSize)S.tokenSize=d.tokenSize;
+    if(d.worldPins)S.worldPins=d.worldPins;if(d.regionPins)S.regionPins=d.regionPins;
+  }}catch(e){}
+  try{const wm=localStorage.getItem(MAP_KEYS.world);if(wm)S.worldMap=wm;}catch(e){}
+  try{const rm=localStorage.getItem(MAP_KEYS.region);if(rm)S.regionMap=rm;}catch(e){}
+  S.loading=false;
+}
+
+function bindEvents(){
+  const token=document.getElementById("party-token");
+  if(token){let dragging=false;
+    const moveToken=(e)=>{if(!dragging)return;e.preventDefault();const img=document.getElementById("map-img");if(!img)return;const rect=img.getBoundingClientRect();const cx=e.clientX??e.touches?.[0]?.clientX;const cy=e.clientY??e.touches?.[0]?.clientY;if(cx==null)return;const x=Math.max(0,Math.min(100,((cx-rect.left)/rect.width)*100));const y=Math.max(0,Math.min(100,((cy-rect.top)/rect.height)*100));token.style.left=x+"%";token.style.top=y+"%";if(S.mapTab==="world")S.worldToken={x,y};else S.regionToken={x,y};};
+    token.addEventListener("pointerdown",e=>{e.preventDefault();token.setPointerCapture(e.pointerId);dragging=true;});
+    window.addEventListener("pointermove",moveToken);window.addEventListener("pointerup",()=>{if(dragging){dragging=false;scheduleSave();}});
+  }
+  const mapInner=document.getElementById("map-inner");if(mapInner)mapInner.addEventListener("click",handleMapClick);
+  const mapImg=document.getElementById("map-img");if(mapImg&&!mapImg.dataset.bound){mapImg.dataset.bound="1";mapImg.addEventListener("load",()=>setTimeout(mapFit,50));}
+}
+
+loadAll();render();
+</script></body></html>
